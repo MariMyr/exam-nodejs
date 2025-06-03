@@ -1,0 +1,459 @@
+info:
+  description: API Documentation for Airbean API
+  title: Airbean API
+  version: 1.0.0
+openapi: 3.0.1
+# Mina components
+components:
+  schemas:
+    User:
+      description: Full user object
+      type: object
+      properties:
+        username:
+          type: string
+          example: user1234
+        password:
+          type: string
+          example: secretpassword
+        role:
+          type: string
+          example: User
+        userId:
+          type: string
+          example: user-yj157
+    UserBody:
+      description: Body sent when registering a new user
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: user1234
+        password:
+          type: string
+          example: secretpassword
+    CartItem:
+      description: Item in cart
+      type: object
+      required:
+        - prodId
+        - qty
+      properties:
+        prodId:
+          type: string
+          example: prod-jespe
+        qty:
+          type: integer
+          example: 2
+        title:
+          type: string
+          example: Bryggkaffe
+        desc:
+          type: string
+          example: Bryggd på månadens bönor
+        price:
+          type: number
+          example: 39
+    Cart:
+      type: object
+      properties:
+        cartId:
+          type: string
+          example: user-8ad78
+        userId:
+          type: string
+          example: user-8ad78
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CartItem"
+        createdAt:
+          type: string
+          format: date-time
+          example: 2025-06-02T13:33:50.992Z
+        updatedAt:
+          type: string
+          format: date-time
+          example: 2025-06-02T13:33:51.026Z
+    CartResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        cart:
+          type: array
+          items:
+            $ref: "#/components/schemas/Cart"
+    CartBody:
+      description: Data to add or update a product in the cart
+      type: object
+      required:
+        - prodId
+        - qty
+      properties:
+        prodId:
+          type: string
+          example: prod-jespe
+        qty:
+          type: integer
+          example: 2
+    OrderItem:
+      type: object
+      properties:
+        prodId:
+          type: string
+          example: prod-jespe
+        title:
+          type: string
+          example: Bryggkaffe
+        desc:
+          type: string
+          example: Bryggd på månadens bönor
+        price:
+          type: number
+          example: 39
+        qty:
+          type: integer
+          example: 2
+    Order:
+      type: object
+      properties:
+        cartId:
+          type: string
+          example: user-2767d
+        userId:
+          type: string
+          example: user-2767d
+        orderId:
+          type: string
+          example: order-29caa
+        OrderItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+        price:
+          type: number
+          example: 78
+        createdAt:
+          type: string
+          format: date-time
+          example: 2025-06-02T12:34:35.137Z
+        updatedAt:
+          type: string
+          format: date-time
+          example: 2025-06-02T12:34:35.173Z
+  ## Här börjar mina responses
+  responses:
+    BadRequestError:
+      description: Bad request from client
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: Missing or invalid parameters in request
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: Requested resource not found
+# Mina paths
+paths:
+  /api/menu:
+    get:
+      tags:
+        - Menu
+      description: Returns all items from menu
+      responses:
+        "200":
+          description: Returns all items from menu
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  menu:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        prodId:
+                          type: string
+                          example: prod-jespe
+                        title:
+                          type: string
+                          example: Bryggkaffe
+                        desc:
+                          type: string
+                          example: Bryggd på månadens bönor
+                        price:
+                          type: number
+                          example: 39
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+  /api/auth/logout:
+    get:
+      tags:
+        - Auth
+      description: Log out user
+      parameters:
+        - in: query
+          name: userId
+          required: true
+          schema:
+            type: string
+            example: user-yj157
+      responses:
+        "200":
+          description: Response for successful logout
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User logged out successfully
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+  /api/auth/register:
+    post:
+      tags:
+        - Auth
+      description: Register new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserBody"
+      responses:
+        "200":
+          description: Response for successful registration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User registrated successfully
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+  /api/auth/login:
+    post:
+      tags:
+        - Auth
+      description: Log in user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserBody"
+      responses:
+        "200":
+          description: Response for successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User logged in successfully
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+  /api/cart:
+    get:
+      tags:
+        - Cart
+      description: Fetch all carts
+      responses:
+        "200":
+          description: Returns all carts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  carts:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Cart"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+    put:
+      tags:
+        - Cart
+      description: Add to cart or update cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CartBody"
+      responses:
+        "200":
+          description: Cart successfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  cart:
+                    $ref: "#/components/schemas/Cart"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+  /api/cart{cartId}:
+    get:
+      tags:
+        - Cart
+      description: Returns a cart with the given cartId
+      parameters:
+        - in: query
+          name: cartId
+          required: true
+          schema:
+            type: string
+            example: user-2767d
+      responses:
+        "200":
+          description: Returns a specific cart
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  cart:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Cart"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+  /api/orders: # GET all orders + POST new order
+    get:
+      tags:
+        - Orders
+      description: Fetch all orders
+      responses:
+        "200":
+          description: Returns all orders
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  orders:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Order"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+    post:
+      tags:
+        - Orders
+      description: Targets the cart received in request body and creates an order. The order is then sent back to the user in the response.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - cartId
+              properties:
+                cartId:
+                  type: string
+                  example: user-2767d
+      responses:
+        "201":
+          description: Order created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  order:
+                    $ref: "#/components/schemas/Order"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+  /api/orders{userId}:
+    get:
+      tags:
+        - Orders
+      description: Returns all orders connected to the userId sent in request params.
+      parameters:
+        - in: query
+          name: userId
+          required: true
+          schema:
+            type: string
+            example: user-2767d
+      responses:
+        "200":
+          description: Returns all orders by userId
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  orders:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Order"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
