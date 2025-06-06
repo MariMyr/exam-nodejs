@@ -1,23 +1,30 @@
 import { Router } from "express";
 import { v4 as uuid } from "uuid";
 import { getUser, registerUser } from "../services/users.js";
+import { validateAuthBody } from "../middlewares/validators.js";
 
 const router = Router();
 
 // GET logout
-router.get("/logout", (req, res) => {
-  global.user = null;
-  res.json({
-    success: true,
-    message: "User logged out successfully",
-  });
+router.get('/logout', (req, res, next) => {
+    if(global.user) {
+        global.user = null;
+        res.json({
+            success: true,
+            message: 'User logged out successfully'
+        });
+    } else {
+        next({
+            status: 400,
+            message: 'No user is currently logged in'
+        });
+    }
 });
 
 // POST login
-router.post("/login", async (req, res, next) => {
+router.post("/login", validateAuthBody, async (req, res, next) => {
   const { username, password } = req.body;
-  if (username && password) {
-    const user = await getUser(username);
+  const user = await getUser(username);
     if (user) {
       if (user.password === password) {
         global.user = user;
@@ -26,30 +33,23 @@ router.post("/login", async (req, res, next) => {
           message: "User logged in successfully",
         });
       } else {
-        next({
-          status: 400,
-          message: "Username or password are incorrect",
+        res.status(400).json({
+          success: false,
+          message: "Username and/or password are incorrect",
         });
       }
     } else {
-      next({
-        status: 400,
+      res.status(400).json({
+        success: false,
         message: "No User found",
       });
     }
-  } else {
-    next({
-      status: 400,
-      message: "Both username and password are required",
-    });
-  }
 });
 
 // POST Register
-router.post("/register", async (req, res, next) => {
+router.post("/register", validateAuthBody, async (req, res, next) => {
   const { username, password } = req.body;
-  if (username && password) {
-    const result = await registerUser({
+  const result = await registerUser({
       username: username,
       password: password,
       role: "User",
@@ -58,20 +58,14 @@ router.post("/register", async (req, res, next) => {
     if (result) {
       res.status(201).json({
         success: true,
-        message: "User created successfully",
+        message: "New user created successfully",
       });
     } else {
-      next({
-        status: 400,
+      res.status(400).json({
+        success: false,
         message: "User could not be created.",
       });
     }
-  } else {
-    next({
-      status: 400,
-      message: "Both username and password are required.",
-    });
-  }
 });
 
 export default router;

@@ -22,8 +22,6 @@ async function getOrCreateCart(userId) {
     }
     return cart;
   } catch (error) {
-    console.log("Nu blev det fel här!");
-
     console.log(error.message);
     return null;
   }
@@ -33,11 +31,10 @@ export async function updateCart(userId, menuItem) {
   try {
     const cart = await getOrCreateCart(userId);
     if (!cart) {
-      throw new Error("Could not retrieve cart");
+      throw new Error("Cart not found or could not be created");
     }
 
     const item = cart.items.find((i) => i.prodId === menuItem.prodId);
-
     if (item) {
       item.qty = menuItem.qty;
     } else {
@@ -47,7 +44,6 @@ export async function updateCart(userId, menuItem) {
     if (menuItem.qty === 0) {
       cart.items = cart.items.filter((i) => i.prodId !== menuItem.prodId);
     }
-
     await cart.save();
     return cart;
   } catch (error) {
@@ -64,3 +60,13 @@ export async function getCartById(cartId) {
     return null;
   }
 }
+
+// export async function deleteCart(cartId) {
+//     try {
+//         let result = await Cart.deleteOne({ cartId : cartId });
+//         return result;
+//     } catch(error) {
+//         console.log(error.message);
+//         return null;
+//     }
+// }

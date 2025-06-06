@@ -17,6 +17,7 @@ const userSchema = new Schema(
     role: {
       type: String,
       required: true,
+      minlength: 4
     },
     userId: {
       type: String,

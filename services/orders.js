@@ -12,7 +12,7 @@ export async function getAllOrders() {
   }
 }
 
-export async function getOrdersByID(userId) {
+export async function getOrdersByUserId(userId) {
   try {
     return await Order.find({ userId: userId });
   } catch (error) {
