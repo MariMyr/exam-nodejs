@@ -7,6 +7,9 @@ import {
 const router = Router();
 import Cart from "../models/cart.js";
 import { validateOrderBody } from "../middlewares/validators.js";
+import { authenticateUser } from "../middlewares/authorize.js";
+
+router.use(authenticateUser);
 
 // GET all orders
 router.get("/", async (req, res, next) => {

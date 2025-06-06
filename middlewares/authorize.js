@@ -1,10 +1,21 @@
-export function authorizeUser(req, res, next) {
-  if (global.user) {
-    next();
+import { verifyToken } from "../utils/index.js";
+
+export function authenticateUser(req, res, next) {
+  if(req.headers.authorization) {
+    const token = req.headers.authorization.replace('Bearer ', '');
+    const verification = verifyToken(token);
+    if(verification) {
+      next();
+    } else {
+      res.status(400).json({
+        success: false,
+        message: "Invalid token"
+    });
+    }
   } else {
-    next({
-      status: 403,
-      message: "You must be logged in to access this route",
+    res.status(400).json({
+      success: false,
+      message: "No token provided"
     });
   }
 }

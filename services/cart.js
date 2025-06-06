@@ -16,7 +16,6 @@ async function getOrCreateCart(userId) {
     if (!cart) {
       cart = await Cart.create({
         cartId: userId,
-        userId: userId,
         items: [],
       });
     }
@@ -31,7 +30,7 @@ export async function updateCart(userId, menuItem) {
   try {
     const cart = await getOrCreateCart(userId);
     if (!cart) {
-      throw new Error("Cart not found or could not be created");
+      throw new Error("Could not retrieve cart");
     }
 
     const item = cart.items.find((i) => i.prodId === menuItem.prodId);

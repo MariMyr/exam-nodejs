@@ -2,6 +2,8 @@ import { Router } from "express";
 import getAllCarts, { getCartById, updateCart } from "../services/cart.js";
 import { getMenuItem } from "../services/menu.js";
 import { v4 as uuid } from "uuid";
+import { verifyToken } from "../utils/index.js";
+import { getUser, getUserByUserId } from "../services/users.js";
 
 const router = Router();
 
@@ -22,78 +24,76 @@ router.get("/", async (req, res, next) => {
 });
 
 // GET cart by ID
-router.get('/:cartId', async (req, res, next) => {
-    const cart = await getCartById(req.params.cartId);
-    if(cart) {
-        res.json({
-            success : true,
-            cart : cart
-        });
-    } else {
-        next({
-            status : 404,
-            message : 'No cart found'
-        });
-    }
-})
+router.get("/:cartId", async (req, res, next) => {
+  const cart = await getCartById(req.params.cartId);
+  if (cart) {
+    res.json({
+      success: true,
+      cart: cart,
+    });
+  } else {
+    next({
+      status: 404,
+      message: "No cart found",
+    });
+  }
+});
 
 // Update cart
 router.put("/", async (req, res, next) => {
   try {
-    const userId = global.user?.userId;
-    const { guestId: bodyGuestId, prodId, qty } = req.body;
-    const menuItem = await getMenuItem(prodId);
-    if (!menuItem) {
-      return res.status(404).json({
-        success: false,
-        message: "Menu item not found",
-      });
-    }
-    if (userId) {
-      const result = await updateCart(userId, {
-        prodId: menuItem.prodId,
-        title: menuItem.title,
-        desc: menuItem.desc,
-        price: menuItem.price,
-        qty,
-      });
-      if (!result) {
-        return res.status(500).json({
+    if (req.headers.authorization) {
+      const token = req.headers.authorization.replace("Bearer ", "");
+      const decodedToken = verifyToken(token);
+
+      if (!decodedToken) {
+        return res.status(401).json({
           success: false,
-          message: "Failed to update cart",
+          message: "Invalid token",
         });
       }
-      return res.json({
+      const user = await getUserByUserId(decodedToken.userId);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User Not found",
+        });
+      }
+
+      const { prodId, qty } = req.body;
+      const menuItem = await getMenuItem(prodId);
+
+      const result = await updateCart(user.userId, {
+        prodId: menuItem.prodId,
+        title: menuItem.title,
+        price: menuItem.price,
+        qty: qty,
+      });
+      res.json({
         success: true,
         cart: result,
       });
     } else {
-      let guestId = bodyGuestId;
+      let { guestId, prodId, qty } = req.body;
+      const menuItem = await getMenuItem(prodId);
       if (!guestId) {
         guestId = `guest-${uuid().substring(0, 5)}`;
       }
+
       const result = await updateCart(guestId, {
         prodId: menuItem.prodId,
         title: menuItem.title,
-        desc: menuItem.desc,
         price: menuItem.price,
         qty,
       });
-      if (!result) {
-        return res.status(500).json({
-          success: false,
-          message: "Failed to update guest cart",
-        });
-      }
-      return res.json({
+      res.json({
         success: true,
         guestId: guestId,
         cart: result,
       });
     }
   } catch (error) {
-    console.error(error);
-    next(error);
+    console.error("Error updating cart:", error);
   }
 });
 

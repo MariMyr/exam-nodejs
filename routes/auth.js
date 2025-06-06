@@ -2,24 +2,16 @@ import { Router } from "express";
 import { v4 as uuid } from "uuid";
 import { getUser, registerUser } from "../services/users.js";
 import { validateAuthBody } from "../middlewares/validators.js";
-import { comparePasswords, hashPassword } from "../utils/index.js";
+import { comparePasswords, hashPassword, signToken } from "../utils/index.js";
 
 const router = Router();
 
 // GET logout  ÄNDRA PÅ DENNA EFTER TOKENS
 router.get("/logout", (req, res, next) => {
-  if (global.user) {
-    global.user = null;
     res.json({
       success: true,
       message: "User logged out successfully",
     });
-  } else {
-    next({
-      status: 400,
-      message: "No user is currently logged in",
-    });
-  }
 });
 
 // POST Register
@@ -52,9 +44,11 @@ router.post("/login", validateAuthBody, async (req, res, next) => {
   if (user) {
     const correctPassword = await comparePasswords(password, user.password);
     if (correctPassword) {
+      const token = signToken({userId : user.userId});
       res.json({
         success: true,
         message: "User logged in successfully",
+        token: `Bearer ${token}`
       });
     } else {
       res.status(400).json({
