@@ -2,10 +2,11 @@ import { Router } from "express";
 import {
   createOrder,
   getAllOrders,
-  getOrdersByID,
+  getOrdersByUserId,
 } from "../services/orders.js";
 const router = Router();
 import Cart from "../models/cart.js";
+import { validateOrderBody } from "../middlewares/validators.js";
 
 // GET all orders
 router.get("/", async (req, res, next) => {
@@ -18,54 +19,42 @@ router.get("/", async (req, res, next) => {
   } else {
     res.status(404).json({
       success: false,
-      message: "Can't find any orders",
+      message: "No orders found",
     });
   }
 });
 
-// GET order by ID
-router.get("/:id", async (req, res, next) => {
-  const userId = req.params.id;
-  try {
-    const orders = await getOrdersByID(userId);
-
-    if (!orders || orders.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "No orders found for this user",
-      });
+// GET order by user-ID
+router.get('/:userId', async (req, res, next) => {
+    const orders = await getOrdersByUserId(req.params.userId);
+    if(orders) {
+        res.json({
+            success : true,
+            orders: orders
+        });
+    } else {
+        next({
+            success : 404,
+            message : 'No orders found'
+        });
     }
-
-    res.json({
-      success: true,
-      orders: orders,
-    });
-  } catch (error) {
-    next(error);
-  }
 });
 
 
 // POST new order
-
-router.post("/", async (req, res, next) => {
+router.post("/", validateOrderBody, async (req, res, next) => {
   try {
     const { cartId } = req.body;
-
     const cart = await Cart.findOne({ cartId: cartId });
-
     if (!cartId) {
       res.json({
         success: false,
         message: "Cart not found",
       });
     }
-
     const order = await createOrder(cartId, cart.items);
     order.orderItems.push(...cart.items);
-
     await order.save();
-
     res.json({
       success: true,
       order: order,
