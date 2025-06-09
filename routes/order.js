@@ -1,13 +1,9 @@
 import { Router } from "express";
-import {
-  createOrder,
-  getAllOrders,
-  getOrdersByUserId,
-} from "../services/orders.js";
-const router = Router();
+import { createOrder, getAllOrders, getOrdersByUserId } from "../services/orders.js";
 import Cart from "../models/cart.js";
 import { validateOrderBody } from "../middlewares/validators.js";
-import { authenticateUser } from "../middlewares/authorize.js";
+
+const router = Router();
 
 // GET all orders
 router.get("/", async (req, res, next) => {
@@ -40,7 +36,6 @@ router.get('/:userId', async (req, res, next) => {
         });
     }
 });
-
 
 // POST new order
 router.post("/", validateOrderBody, async (req, res, next) => {

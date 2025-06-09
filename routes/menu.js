@@ -1,13 +1,7 @@
 import { Router } from "express";
-import {
-  createNewProduct,
-  deleteProduct,
-  getMenu,
-  updateProduct,
-} from "../services/menu.js";
+import { createNewProduct, deleteProduct, getMenu, updateProduct } from "../services/menu.js";
 import { adminsOnly, authenticateUser } from "../middlewares/authorize.js";
 import { v4 as uuid } from "uuid";
-import product from "../models/product.js";
 
 const router = Router();
 
