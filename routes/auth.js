@@ -2,11 +2,12 @@ import { Router } from "express";
 import { v4 as uuid } from "uuid";
 import { getUser, registerUser } from "../services/users.js";
 import { validateAuthBody } from "../middlewares/validators.js";
-import { comparePasswords, hashPassword, signToken } from "../utils/index.js";
+import { signToken } from "../utils/token.js";
+import { hashPassword, comparePasswords } from "../utils/hash.js";
 
 const router = Router();
 
-// GET logout  ÄNDRA PÅ DENNA EFTER TOKENS
+// GET logout
 router.get("/logout", (req, res, next) => {
     res.json({
       success: true,
@@ -16,12 +17,12 @@ router.get("/logout", (req, res, next) => {
 
 // POST Register
 router.post("/register", validateAuthBody, async (req, res, next) => {
-  const { username, password } = req.body;
+  const { username, password, role } = req.body;
   const hashedPassword = await hashPassword(password);
   const result = await registerUser({
     username: username,
     password: hashedPassword,
-    role: "User", // role som man kan välja!
+    role: role.toLowerCase(),
     userId: `user-${uuid().substring(0, 5)}`,
   });
   if (result) {
@@ -44,7 +45,7 @@ router.post("/login", validateAuthBody, async (req, res, next) => {
   if (user) {
     const correctPassword = await comparePasswords(password, user.password);
     if (correctPassword) {
-      const token = signToken({userId : user.userId});
+      const token = signToken({userId : user.userId, role: user.role});
       res.json({
         success: true,
         message: "User logged in successfully",
