@@ -1,6 +1,6 @@
 import Cart from "../models/cart.js";
 
-export default async function getAllCarts() {
+export async function getAllCarts() {
   try {
     const carts = await Cart.find();
     return carts;
@@ -10,7 +10,7 @@ export default async function getAllCarts() {
   }
 }
 
-async function getOrCreateCart(userId) {
+export async function getOrCreateCart(userId) {
   try {
     let cart = await Cart.findOne({ cartId: userId });
     if (!cart) {
@@ -26,22 +26,22 @@ async function getOrCreateCart(userId) {
   }
 }
 
-export async function updateCart(userId, menuItem) {
+export async function updateCart(userId, productItem) {
   try {
     const cart = await getOrCreateCart(userId);
     if (!cart) {
       throw new Error("Could not retrieve cart");
     }
 
-    const item = cart.items.find((i) => i.prodId === menuItem.prodId);
+    const item = cart.items.find((i) => i.prodId === productItem.prodId);
     if (item) {
-      item.qty = menuItem.qty;
+      item.qty = productItem.qty;
     } else {
-      cart.items.push(menuItem);
+      cart.items.push(productItem);
     }
 
-    if (menuItem.qty === 0) {
-      cart.items = cart.items.filter((i) => i.prodId !== menuItem.prodId);
+    if (productItem.qty === 0) {
+      cart.items = cart.items.filter((i) => i.prodId !== productItem.prodId);
     }
     await cart.save();
     return cart;

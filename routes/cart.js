@@ -1,6 +1,6 @@
 import { Router } from "express";
-import getAllCarts, { getCartById, updateCart } from "../services/cart.js";
-import { getMenuItem } from "../services/menu.js";
+import { getAllCarts, getCartById, updateCart } from "../services/cart.js";
+import { getproductItem } from "../services/menu.js";
 import { v4 as uuid } from "uuid";
 import { verifyToken } from "../utils/token.js";
 import { getUser, getUserByUserId } from "../services/users.js";
@@ -61,12 +61,12 @@ router.put("/", async (req, res, next) => {
       }
 
       const { prodId, qty } = req.body;
-      const menuItem = await getMenuItem(prodId);
+      const productItem = await getproductItem(prodId);
 
       const result = await updateCart(user.userId, {
-        prodId: menuItem.prodId,
-        title: menuItem.title,
-        price: menuItem.price,
+        prodId: productItem.prodId,
+        title: productItem.title,
+        price: productItem.price,
         qty: qty,
       });
       res.json({
@@ -75,15 +75,15 @@ router.put("/", async (req, res, next) => {
       });
     } else {
       let { guestId, prodId, qty } = req.body;
-      const menuItem = await getMenuItem(prodId);
+      const productItem = await getproductItem(prodId);
       if (!guestId) {
         guestId = `guest-${uuid().substring(0, 5)}`;
       }
 
       const result = await updateCart(guestId, {
-        prodId: menuItem.prodId,
-        title: menuItem.title,
-        price: menuItem.price,
+        prodId: productItem.prodId,
+        title: productItem.title,
+        price: productItem.price,
         qty,
       });
       res.json({
