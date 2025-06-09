@@ -5,6 +5,11 @@ info:
 openapi: 3.0.1
 # Mina components
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     User:
       description: Full user object
@@ -28,6 +33,7 @@ components:
       required:
         - username
         - password
+        - role
       properties:
         username:
           type: string
@@ -35,6 +41,9 @@ components:
         password:
           type: string
           example: secretpassword
+        role:
+          type: string
+          example: admin
     CartItem:
       description: Item in cart
       type: object
@@ -89,7 +98,7 @@ components:
           items:
             $ref: "#/components/schemas/Cart"
     CartBody:
-      description: Data to add or update a product in the cart
+      description: Body seny to add or update a product in the cart
       type: object
       required:
         - prodId
@@ -146,6 +155,39 @@ components:
           type: string
           format: date-time
           example: 2025-06-02T12:34:35.173Z
+    Product:
+      description: Product
+      type: object
+      properties:
+        prodId:
+          type: string
+          example: prod-ju659
+        title:
+          type: string
+          example: Americano
+        desc:
+          type: string
+          example: Med kaffebönor från Brazil
+        price:
+          type: number
+          example: 39
+    ProductBody:
+      description: Body sent to add a new product to menu
+      type: object
+      required:
+        - title
+        - desc
+        - price
+      properties:
+        title:
+          type: string
+          example: Americano
+        desc:
+          type: string
+          example: Med kaffebönor från Brazil
+        price:
+          type: number
+          example: 49
   ## Här börjar mina responses
   responses:
     BadRequestError:
@@ -176,14 +218,14 @@ components:
                 example: Requested resource not found
 # Mina paths
 paths:
-  /api/product:
+  /api/menu:
     get:
       tags:
-        - product
-      description: Returns all items from product
+        - Menu
+      description: Returns all products from menu
       responses:
         "200":
-          description: Returns all items from product
+          description: Returns all products from menu
           content:
             application/json:
               schema:
@@ -211,18 +253,118 @@ paths:
                           example: 39
         "404":
           $ref: "#/components/responses/NotFoundError"
+    post:
+      tags:
+        - Menu
+      summary: Add new product to menu
+      description: |
+        User must be logged in as admin. Send a JWT in header as: `Authorization: Bearer <token>`.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              $ref: "#/components/schemas/ProductBody"
+      responses:
+        "200":
+          description: Confirmation for successfully adding a product
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: New product added successfully
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+  /api/menu{prodId}:
+    put:
+      tags:
+        - Menu
+      summary: Updates an existing product in the menu
+      description: |
+        User must be logged in as admin. Send a JWT in header as: `Authorization: Bearer <token>`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: prodId
+          required: true
+          schema:
+            type: string
+            example: prod-ju659
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductBody"
+      responses:
+        "200":
+          description: Product updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Product updated
+                  product:
+                    $ref: "#/components/schemas/Product"
+      "403":
+        description: Access denied, admin only
+      "404":
+        $ref: "#/components/responses/NotFoundError"
+    delete:
+      tags:
+        - Menu
+      summary: Deletes specific product from menu
+      description: |
+        User must be logged in as admin. Send a JWT in header as: `Authorization: Bearer <token>`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: prodId
+          required: true
+          schema:
+            type: string
+            example: prod-ju659
+      responses:
+        "200":
+          description: Confirmation of successful deletion
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Product deleted successfully
+                  product:
+                    type: object
+                    $ref: "#/components/schemas/Product"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
   /api/auth/logout:
     get:
       tags:
         - Auth
       description: Log out user
-      parameters:
-        - in: query
-          name: userId
-          required: true
-          schema:
-            type: string
-            example: user-yj157
       responses:
         "200":
           description: Response for successful logout
@@ -263,20 +405,27 @@ paths:
                     example: true
                   message:
                     type: string
-                    example: User registrated successfully
+                    example: New user created successfully
         "400":
           $ref: "#/components/responses/BadRequestError"
   /api/auth/login:
     post:
       tags:
         - Auth
-      description: Log in user
+      description: Log in a user and returns a JWT token
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UserBody"
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: user1234
+                password:
+                  type: string
+                  example: userPassword
       responses:
         "200":
           description: Response for successful login
@@ -291,6 +440,9 @@ paths:
                   message:
                     type: string
                     example: User logged in successfully
+                  token:
+                    type: string
+                    example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
         "400":
           $ref: "#/components/responses/BadRequestError"
   /api/cart:
@@ -373,7 +525,7 @@ paths:
           $ref: "#/components/responses/NotFoundError"
         "400":
           $ref: "#/components/responses/BadRequestError"
-  /api/orders: # GET all orders + POST new order
+  /api/orders:
     get:
       tags:
         - Orders

@@ -1,5 +1,10 @@
 import { Router } from "express";
-import { createNewProduct, deleteProduct, getMenu, updateProduct } from "../services/menu.js";
+import {
+  createNewProduct,
+  deleteProduct,
+  getMenu,
+  updateProduct,
+} from "../services/menu.js";
 import { adminsOnly, authenticateUser } from "../middlewares/authorize.js";
 import { v4 as uuid } from "uuid";
 import product from "../models/product.js";
@@ -62,43 +67,49 @@ router.put("/:prodid", authenticateUser, adminsOnly, async (req, res, next) => {
   const prodId = req.params.prodid;
   const { title, desc, price } = req.body;
   const updatedData = {};
-  if(title) updatedData.title = title;
-  if(desc) updatedData.desc = desc;
-  if(price) updatedData.price = price;
+  if (title) updatedData.title = title;
+  if (desc) updatedData.desc = desc;
+  if (price) updatedData.price = price;
 
   updatedData.modifiedAt = new Date();
   const result = await updateProduct(prodId, updatedData);
 
-  if(result) {
+  if (result) {
     res.json({
       success: true,
       message: "Product updated",
-      product: result
+      product: result,
     });
   } else {
     res.status(404).json({
       success: false,
-      message: "Could not update product"
-    })
-  }
-})
-
-
-// DELETE product from menu
-router.delete("/:prodid", authenticateUser, adminsOnly, async (req, res, next) => {
-  const prodId = req.params.prodid;
-  const result = await deleteProduct(prodId);
-
-  if(result) {
-    res.json({
-      success: true,
-      message: "Product deleted successfully"
-    });
-  } else {
-    res.status(404).json({
-      success: false,
-      message: "Product not found with given ID"
+      message: "Could not update product",
     });
   }
 });
+
+// DELETE product from menu
+router.delete("/:prodid", authenticateUser, adminsOnly, async (req, res, next) => {
+    const prodId = req.params.prodid;
+    try {
+      const result = await deleteProduct(prodId);
+
+      if (result) {
+        res.json({
+          success: true,
+          message: "Product deleted successfully",
+          product: result,
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          message: "Product not found with given ID",
+        });
+      }
+    } catch (error) {
+      console.log(error.message);
+      return null;
+    }
+  }
+);
 export default router;

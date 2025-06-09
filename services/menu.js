@@ -43,8 +43,9 @@ export async function updateProduct(prodId, updatedProduct) {
 
 export async function deleteProduct(prodId) {
   try {
-    const result = await Product.findOneAndDelete({prodId: prodId});
-    return result;
+    const product = await Product.findOneAndDelete({prodId: prodId});
+    if (!product) throw new Error("Product not found");
+    return product;
   } catch(error) {
     console.log(error.message);
     return null;
