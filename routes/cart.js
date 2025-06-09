@@ -2,7 +2,7 @@ import { Router } from "express";
 import getAllCarts, { getCartById, updateCart } from "../services/cart.js";
 import { getMenuItem } from "../services/menu.js";
 import { v4 as uuid } from "uuid";
-import { verifyToken } from "../utils/index.js";
+import { verifyToken } from "../utils/token.js";
 import { getUser, getUserByUserId } from "../services/users.js";
 
 const router = Router();
