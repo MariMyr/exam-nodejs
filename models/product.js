@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const Schema = mongoose.Schema;
 
-const menuSchema = new Schema(
+const productSchema = new Schema(
   {
     prodId: {
       type: String,
@@ -21,9 +21,12 @@ const menuSchema = new Schema(
       type: Number,
       required: true,
     },
+    modifiedAt: {
+      type: Date,
+    },
   },
-  { collection: "menu" }
+  { timestamps: true }
 );
 
-const Menu = mongoose.model("Menu", menuSchema);
-export default Menu;
+const product = mongoose.model("product", productSchema, "menu");
+export default product;

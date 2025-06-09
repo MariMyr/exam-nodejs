@@ -176,14 +176,14 @@ components:
                 example: Requested resource not found
 # Mina paths
 paths:
-  /api/menu:
+  /api/product:
     get:
       tags:
-        - Menu
-      description: Returns all items from menu
+        - product
+      description: Returns all items from product
       responses:
         "200":
-          description: Returns all items from menu
+          description: Returns all items from product
           content:
             application/json:
               schema:
@@ -192,7 +192,7 @@ paths:
                   success:
                     type: boolean
                     example: true
-                  menu:
+                  product:
                     type: array
                     items:
                       type: object
