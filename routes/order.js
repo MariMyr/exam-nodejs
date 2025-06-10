@@ -37,10 +37,10 @@ router.get('/:userId', async (req, res, next) => {
     }
 });
 
-// POST new order
+// POST new order (with optional note)
 router.post("/", validateOrderBody, async (req, res, next) => {
   try {
-    const { cartId } = req.body;
+    const { cartId, note } = req.body;
     const cart = await Cart.findOne({ cartId: cartId });
     if (!cartId) {
       res.json({
@@ -48,7 +48,7 @@ router.post("/", validateOrderBody, async (req, res, next) => {
         message: "Cart not found",
       });
     }
-    const order = await createOrder(cartId, cart.items);
+    const order = await createOrder(cartId, cart.items, note);
     order.orderItems.push(...cart.items);
     await order.save();
     res.json({

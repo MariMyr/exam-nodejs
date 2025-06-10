@@ -20,7 +20,7 @@ export async function getOrdersByUserId(userId) {
   }
 }
 
-export async function createOrder(userId, orderItems) {
+export async function createOrder(userId, orderItems, note = "") {
   try {
     const totalPrice = orderItems.reduce((sum, item) => {
       return sum + item.price * item.qty;
@@ -32,6 +32,7 @@ export async function createOrder(userId, orderItems) {
       orderId: `order-${uuid().substring(0, 5)}`,
       orderItems: [],
       price: totalPrice,
+      note: note
     });
     await Cart.deleteOne({ cartId: userId });
     return order;

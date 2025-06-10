@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createNewProduct, deleteProduct, getMenu, updateProduct } from "../services/menu.js";
+import { createNewProduct, deleteProduct, getMenu, getProductByQuery, updateProduct } from "../services/menu.js";
 import { adminsOnly, authenticateUser } from "../middlewares/authorize.js";
 import { v4 as uuid } from "uuid";
 
@@ -87,7 +87,6 @@ router.delete("/:prodid", authenticateUser, adminsOnly, async (req, res, next) =
     const prodId = req.params.prodid;
     try {
       const result = await deleteProduct(prodId);
-
       if (result) {
         res.json({
           success: true,
@@ -106,4 +105,27 @@ router.delete("/:prodid", authenticateUser, adminsOnly, async (req, res, next) =
     }
   }
 );
+
+// GET with query parameter
+router.get("/search", async (req, res, next) => {
+  let query = req.query.query;
+  try {
+    const result = await getProductByQuery(query);
+    if(result && result.length > 0) {
+      res.json({
+        success: true,
+        result: result
+      });
+    } else {
+        res.status(404).json({
+          success: false,
+          message: "No products found matching the query"
+        });
+    }
+  } catch(error) {
+    console.log(error.message);
+    return null;
+  }
+});
+
 export default router;
