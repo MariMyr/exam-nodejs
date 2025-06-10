@@ -253,6 +253,49 @@ paths:
                           example: 39
         "404":
           $ref: "#/components/responses/NotFoundError"
+  /api/menu/search:
+    get:
+      tags:
+        - Menu
+      description: Search products by query string
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            type: string
+          description: Search term to search products by title
+          example: Cappucino
+      responses:
+        "200":
+          description: Returns matching products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  product:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        prodId:
+                          type: string
+                          example: prod-rgist
+                        title:
+                          type: string
+                          example: Cappucino
+                        desc:
+                          type: string
+                          example: Bryggd på månadens bönor
+                        price:
+                          type: number
+                          example: 49
+        "404":
+          $ref: "#/components/responses/NotFoundError"
     post:
       tags:
         - Menu
@@ -527,6 +570,33 @@ paths:
           $ref: "#/components/responses/NotFoundError"
         "400":
           $ref: "#/components/responses/BadRequestError"
+    delete:
+      tags:
+        - Cart
+      description: Deletes specific cart
+      parameters:
+        - in: path
+          name: cartId
+          required: true
+          schema:
+            type: string
+            example: user-ju659
+      responses:
+        "200":
+          description: Confirmation of successful deletion
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Cart deleted successfully
+        "404":
+          $ref: "#/components/responses/NotFoundError"
   /api/orders:
     get:
       tags:
@@ -552,7 +622,7 @@ paths:
     post:
       tags:
         - Orders
-      description: Targets the cart received in request body and creates an order. The order is then sent back to the user in the response.
+      description: Targets the cart received in request body and creates an order with optional note
       requestBody:
         required: true
         content:

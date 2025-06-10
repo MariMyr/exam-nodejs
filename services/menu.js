@@ -51,3 +51,13 @@ export async function deleteProduct(prodId) {
     return null;
   }
 }
+
+export async function getProductByQuery(query) {
+  try {
+    const searchedProduct = await Product.find({ title: { $regex: query, $options: 'i' } });
+    return searchedProduct;
+  } catch(error) {
+    console.log(error.message);
+    return null;
+  }
+}

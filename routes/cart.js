@@ -1,5 +1,10 @@
 import { Router } from "express";
-import { getAllCarts, getCartById, updateCart } from "../services/cart.js";
+import {
+  deleteCart,
+  getAllCarts,
+  getCartById,
+  updateCart,
+} from "../services/cart.js";
 import { getproductItem } from "../services/menu.js";
 import { v4 as uuid } from "uuid";
 import { verifyToken } from "../utils/token.js";
@@ -23,7 +28,7 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-// GET cart by ID
+// GET cart by cart-ID
 router.get("/:cartId", async (req, res, next) => {
   const cart = await getCartById(req.params.cartId);
   if (cart) {
@@ -94,6 +99,29 @@ router.put("/", async (req, res, next) => {
     }
   } catch (error) {
     console.error("Error updating cart:", error);
+  }
+});
+
+// DELETE cart by cart-ID
+router.delete("/:cartId", async (req, res, next) => {
+  const cartId = req.params.cartId;
+  try {
+    const result = await deleteCart(cartId);
+    if (result && result.deletedCount > 0) {
+      res.json({
+        success: true,
+        message: "Cart deleted successfully",
+        cart: result,
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        message: "Cart not found with given ID",
+      });
+    }
+  } catch (error) {
+    console.log(error.message);
+    return null;
   }
 });
 
