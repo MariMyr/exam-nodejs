@@ -5,7 +5,7 @@ import { v4 as uuid } from "uuid";
 
 const router = Router();
 
-// GET all product items
+// GET all product from menu
 router.get("/", async (req, res, next) => {
   const menu = await getMenu();
   if (menu) {
@@ -21,7 +21,7 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-// POST new product to menu
+// POST add new product to menu
 router.post("/", authenticateUser, adminsOnly, async (req, res, next) => {
   try {
     const { title, desc, price } = req.body;
@@ -71,7 +71,7 @@ router.put("/:prodid", authenticateUser, adminsOnly, async (req, res, next) => {
   if (result) {
     res.json({
       success: true,
-      message: "Product updated",
+      message: "Product updated successfully",
       product: result,
     });
   } else {

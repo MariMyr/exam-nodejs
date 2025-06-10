@@ -24,13 +24,10 @@ export async function authenticateUser(req, res, next) {
     });
   }
   req.user = user;
-  console.log("AUTHENTICATED USER:", user);
-  console.log("USER ROLE:", user.role);
   next();
 }
 
 export function adminsOnly(req, res, next) {
-  console.log("CHECKING ROLE:", req.user?.role);
   if (!req.user || req.user.role !== "admin") {
     return res.status(403).json({
       success: false,

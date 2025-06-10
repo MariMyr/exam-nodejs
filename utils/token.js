@@ -4,7 +4,7 @@ export function signToken(payload) {
     const token = jwt.sign(
         payload,
         process.env.MYSUPERSECRET,
-        { expiresIn:60 * 60 }
+        { expiresIn: 60 * 60 }
     );
     return token;
 }
@@ -20,6 +20,6 @@ export function verifyToken(token) {
 }
 
 export function extractToken(req) {
-  const authHeader = req.headers.authorization || '';
-  return authHeader.startsWith("Bearer ") ? authHeader.replace("Bearer ", "") : null;
+    const authHeader = req.headers.authorization || '';
+    return authHeader.startsWith("Bearer ") ? authHeader.replace("Bearer ", "") : null;
 }
