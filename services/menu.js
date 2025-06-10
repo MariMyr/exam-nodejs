@@ -10,7 +10,7 @@ export async function getMenu() {
   }
 }
 
-export async function getproductItem(prodId) {
+export async function getProduct(prodId) {
   try {
     const product = await Product.findOne({ prodId: prodId });
     return product;
@@ -22,9 +22,9 @@ export async function getproductItem(prodId) {
 
 export async function createNewProduct(product) {
   try {
-    const result = await Product.create(product)
+    const result = await Product.create(product);
     return result;
-  } catch(error) {
+  } catch (error) {
     console.log(error.message);
     return null;
   }
@@ -32,10 +32,14 @@ export async function createNewProduct(product) {
 
 export async function updateProduct(prodId, updatedProduct) {
   try {
-    const product = await Product.findOneAndUpdate({ prodId: prodId }, updatedProduct, { new: true });
+    const product = await Product.findOneAndUpdate(
+      { prodId: prodId },
+      updatedProduct,
+      { new: true }
+    );
     if (!product) throw new Error("Prdouct not found");
     return product;
-  } catch(error) {
+  } catch (error) {
     console.log(error.message);
     return null;
   }
@@ -43,10 +47,10 @@ export async function updateProduct(prodId, updatedProduct) {
 
 export async function deleteProduct(prodId) {
   try {
-    const product = await Product.findOneAndDelete({prodId: prodId});
+    const product = await Product.findOneAndDelete({ prodId: prodId });
     if (!product) throw new Error("Product not found");
     return product;
-  } catch(error) {
+  } catch (error) {
     console.log(error.message);
     return null;
   }
@@ -54,9 +58,11 @@ export async function deleteProduct(prodId) {
 
 export async function getProductByQuery(query) {
   try {
-    const searchedProduct = await Product.find({ title: { $regex: query, $options: 'i' } });
+    const searchedProduct = await Product.find({
+      title: { $regex: query, $options: "i" },
+    });
     return searchedProduct;
-  } catch(error) {
+  } catch (error) {
     console.log(error.message);
     return null;
   }

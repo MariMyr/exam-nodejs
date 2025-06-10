@@ -5,7 +5,7 @@ import {
   getCartById,
   updateCart,
 } from "../services/cart.js";
-import { getproductItem } from "../services/menu.js";
+import { getProduct } from "../services/menu.js";
 import { v4 as uuid } from "uuid";
 import { verifyToken } from "../utils/token.js";
 import { getUserByUserId } from "../services/users.js";
@@ -66,7 +66,7 @@ router.put("/", async (req, res, next) => {
       }
 
       const { prodId, qty } = req.body;
-      const productItem = await getproductItem(prodId);
+      const productItem = await getProduct(prodId);
 
       const result = await updateCart(user.userId, {
         prodId: productItem.prodId,
@@ -80,7 +80,7 @@ router.put("/", async (req, res, next) => {
       });
     } else {
       let { guestId, prodId, qty } = req.body;
-      const productItem = await getproductItem(prodId);
+      const productItem = await getProduct(prodId);
       if (!guestId) {
         guestId = `guest-${uuid().substring(0, 5)}`;
       }

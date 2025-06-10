@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { createOrder, getAllOrders, getOrdersByUserId } from "../services/orders.js";
+import {
+  createOrder,
+  getAllOrders,
+  getOrdersByUserId,
+} from "../services/orders.js";
 import Cart from "../models/cart.js";
 import { validateOrderBody } from "../middlewares/validators.js";
 
@@ -22,19 +26,24 @@ router.get("/", async (req, res, next) => {
 });
 
 // GET order by user-ID
-router.get('/:userId', async (req, res, next) => {
+router.get("/:userId", async (req, res, next) => {
+  try {
     const orders = await getOrdersByUserId(req.params.userId);
-    if(orders) {
-        res.json({
-            success : true,
-            orders: orders
-        });
+    if (orders && orders.length > 0) {
+      res.json({
+        success: true,
+        orders: orders,
+      });
     } else {
-        next({
-            success : 404,
-            message : 'No orders found'
-        });
+      return res.status(404).json({
+        success: false,
+        message: "No orders found",
+      });
     }
+  } catch (error) {
+    console.log(error.message);
+    return null;
+  }
 });
 
 // POST new order (with optional note)

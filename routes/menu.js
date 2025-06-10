@@ -5,7 +5,7 @@ import { v4 as uuid } from "uuid";
 
 const router = Router();
 
-// GET all product from menu
+// GET all products from menu
 router.get("/", async (req, res, next) => {
   const menu = await getMenu();
   if (menu) {
