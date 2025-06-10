@@ -282,6 +282,8 @@ paths:
                   message:
                     type: string
                     example: New product added successfully
+        "403":
+        description: Access denied, admin only
         "400":
           $ref: "#/components/responses/BadRequestError"
   /api/menu{prodId}:
@@ -308,7 +310,7 @@ paths:
               $ref: "#/components/schemas/ProductBody"
       responses:
         "200":
-          description: Product updated successfully
+          description: Confirmation for updating a product successfully
           content:
             application/json:
               schema:
@@ -358,6 +360,8 @@ paths:
                   product:
                     type: object
                     $ref: "#/components/schemas/Product"
+        "403":
+        description: Access denied, admin only
         "404":
           $ref: "#/components/responses/NotFoundError"
   /api/auth/logout:
@@ -379,8 +383,6 @@ paths:
                   message:
                     type: string
                     example: User logged out successfully
-        "404":
-          $ref: "#/components/responses/NotFoundError"
   /api/auth/register:
     post:
       tags:
@@ -425,7 +427,7 @@ paths:
                   example: user1234
                 password:
                   type: string
-                  example: userPassword
+                  example: secretpassword
       responses:
         "200":
           description: Response for successful login
